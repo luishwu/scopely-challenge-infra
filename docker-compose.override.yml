@@ -1,0 +1,32 @@
+name: scopely-challenge-infra
+services:
+  player-database:
+    container_name: "player-database"
+    env_file:
+      - ./environments/.player-database.env
+    healthcheck:
+      test: pg_isready -d player-database -U admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./player-database:/var/lib/postgresql/data
+  battle-database:
+    container_name: "battle-database"
+    env_file:
+      - ./environments/.battle-database.env
+    healthcheck:
+      test: pg_isready -d battle-database -U admin
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./battle-database:/var/lib/postgresql/data
+  rabbitmq:
+    container_name: "rabbitmq"
+    env_file:
+      - ./environments/.rabbitmq.env
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq/
