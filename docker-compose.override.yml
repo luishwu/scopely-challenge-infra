@@ -10,6 +10,31 @@ services:
       - "5432:5432"
     volumes:
       - ./player-database:/var/lib/postgresql/data
+
+  api-gateway:
+    container_name: "api-gateway"
+    image: "api-gateway"
+    env_file:
+      - ./environments/.api-gateway.env
+    build:
+      context: ./../scopely-challenge/
+      dockerfile: Dockerfile.api-gateway
+      args:
+        NODE_ALPINE_VERSION: ${NODE_ALPINE_VERSION:?err}
+        PORT: ${API_GATEWAY_PORT:?err}
+
+  player-service:
+    container_name: "player-service"
+    image: "player-service"
+    env_file:
+      - ./environments/.player-service.env
+    build:
+      context: ./../scopely-challenge/
+      dockerfile: Dockerfile.player-service
+      args:
+        NODE_ALPINE_VERSION: ${NODE_ALPINE_VERSION:?err}
+        PORT: ${PLAYER_SERVICE_PORT:?err}
+
   battle-database:
     container_name: "battle-database"
     env_file:
@@ -20,6 +45,30 @@ services:
       - "5433:5432"
     volumes:
       - ./battle-database:/var/lib/postgresql/data
+
+  battle-service:
+    container_name: "battle-service"
+    image: "battle-service"
+    env_file:
+      - ./environments/.battle-service.env
+    build:
+      context: ./../scopely-challenge/
+      dockerfile: Dockerfile.battle-service
+      args:
+        NODE_ALPINE_VERSION: ${NODE_ALPINE_VERSION:?err}
+        PORT: ${BATTLE_SERVICE_PORT:?err}
+
+  battle-worker-service:
+    container_name: "battle-worker-service"
+    image: "battle-worker-service"
+    env_file:
+      - ./environments/.battle-worker-service.env
+    build:
+      context: ./../scopely-challenge/
+      dockerfile: Dockerfile.battle-worker-service
+      args:
+        NODE_ALPINE_VERSION: ${NODE_ALPINE_VERSION:?err}
+        PORT: ${BATTLE_WORKER_SERVICE_PORT:?err}
   rabbitmq:
     container_name: "rabbitmq"
     env_file:

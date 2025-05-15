@@ -19,6 +19,61 @@ services:
           memory: "1g"
     storage_opt:
       size: "4g"
+    networks:
+      scopelynetwork:
+        aliases:
+          - player-database
+
+  api-gateway:
+    command: node dist/main
+    ports:
+      - "${API_GATEWAY_PORT:?err}:${API_GATEWAY_PORT:?err}"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      resources:
+        limits:
+          cpus: "2"
+          memory: "2g"
+        reservations:
+          cpus: "1"
+          memory: "1g"
+    storage_opt:
+      size: "4g"
+    networks:
+      scopelynetwork:
+        aliases:
+          - api-gateway
+  player-service:
+    command: node dist/main
+    expose:
+      - "${PLAYER_APP_PORT:?err}"
+      - "${PLAYER_SERVICE_PORT:?err}"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      resources:
+        limits:
+          cpus: "2"
+          memory: "2g"
+        reservations:
+          cpus: "1"
+          memory: "1g"
+    storage_opt:
+      size: "4g"
+    depends_on:
+      - player-database
+    networks:
+      scopelynetwork:
+        aliases:
+          - player-service
+
   battle-database:
     image: "postgres:${POSTGRES_VERSION:?err}"
     volumes:
@@ -38,6 +93,64 @@ services:
           memory: "1g"
     storage_opt:
       size: "4g"
+    networks:
+      scopelynetwork:
+        aliases:
+          - battle-database
+
+  battle-service:
+    command: node dist/main
+    expose:
+      - "${BATTLE_APP_PORT:?err}"
+      - "${BATTLE_SERVICE_PORT:?err}"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      resources:
+        limits:
+          cpus: "2"
+          memory: "2g"
+        reservations:
+          cpus: "1"
+          memory: "1g"
+    storage_opt:
+      size: "4g"
+    depends_on:
+      - battle-database
+    networks:
+      scopelynetwork:
+        aliases:
+          - battle-service
+
+  battle-worker-service:
+    command: node dist/main
+    expose:
+      - "${BATTLE_WORKER_APP_PORT:?err}"
+      - "${BATTLE_WORKER_SERVICE_PORT:?err}"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      resources:
+        limits:
+          cpus: "2"
+          memory: "2g"
+        reservations:
+          cpus: "1"
+          memory: "1g"
+    storage_opt:
+      size: "4g"
+    depends_on:
+      - battle-service
+    networks:
+      scopelynetwork:
+        aliases:
+          - battle-worker-service
   rabbitmq:
     image: "rabbitmq:${RABBITMQ_VERSION:?err}"
     container_name: "rabbitmq"
@@ -51,3 +164,11 @@ services:
           memory: "512M"
     storage_opt:
       size: "2g"
+    networks:
+      scopelynetwork:
+        aliases:
+          - rabbitmq
+
+networks:
+  scopelynetwork:
+    external: false
